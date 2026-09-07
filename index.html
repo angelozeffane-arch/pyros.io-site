@@ -6,6 +6,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#050A18">
+<meta name="color-scheme" content="dark light">
 <meta name="author" content="Angelo Zeffane - PYROS Accompagnement">
 <meta name="copyright" content="© Angelo Zeffane — PYROS Accompagnement™ — Tous droits réservés">
 <meta name="dcterms.rightsHolder" content="Angelo Zeffane">
@@ -40,14 +41,48 @@
 <!-- ── Thème appliqué avant le rendu : évite le flash blanc/noir au chargement ── -->
 <script>
 (function(){
-  var m;
-  try{ m = localStorage.getItem('pyros-theme'); }catch(e){}
-  if(m !== 'light' && m !== 'dark') m = 'dark';
-  document.documentElement.setAttribute('data-theme', m);
-  if(m === 'light'){
+  /* Ordre de priorite :
+     1. choix explicite de l'utilisateur (bouton de l'en-tete)
+     2. reglage de l'appareil (prefers-color-scheme)
+     3. sombre par defaut si le navigateur ne repond pas
+     Le point 3 couvre les vieux navigateurs integres (Instagram,
+     Facebook, TikTok) qui n'exposent pas la preference systeme. */
+  var W = window;
+  W.PYROS_THEME = W.PYROS_THEME || {};
+
+  W.PYROS_THEME.system = function(){
+    if(!W.matchMedia) return null;
+    try{
+      if(W.matchMedia('(prefers-color-scheme: dark)').matches)  return 'dark';
+      if(W.matchMedia('(prefers-color-scheme: light)').matches) return 'light';
+    }catch(e){}
+    return null;                      /* preference inconnue */
+  };
+
+  W.PYROS_THEME.saved = function(){
+    var m = null;
+    try{ m = localStorage.getItem('pyros-theme'); }catch(e){}
+    return (m === 'light' || m === 'dark') ? m : null;
+  };
+
+  W.PYROS_THEME.paint = function(mode){
+    var d = document.documentElement;
+    if(d.getAttribute('data-theme') !== mode) d.setAttribute('data-theme', mode);
+    d.style.colorScheme = mode;
     var mc = document.querySelector('meta[name="theme-color"]');
-    if(mc) mc.setAttribute('content', '#FFFFFF');
-  }
+    if(mc) mc.setAttribute('content', mode === 'light' ? '#FFFFFF' : '#050A18');
+    var b = document.getElementById('themeBtn');
+    if(b) b.setAttribute('aria-pressed', mode === 'light');
+  };
+
+  /* resout et applique, sans jamais ecraser un choix explicite */
+  W.PYROS_THEME.resolve = function(){
+    var m = W.PYROS_THEME.saved() || W.PYROS_THEME.system() || 'dark';
+    W.PYROS_THEME.paint(m);
+    return m;
+  };
+
+  W.PYROS_THEME.resolve();
 })();
 </script>
 
@@ -198,6 +233,12 @@ header.up{transform:translateY(-104%)}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes flick{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.07);opacity:.86}}
 .flamewrap.foot{margin:0 auto 26px;opacity:.85}
+/* logo flamme en image : une version par theme */
+.flamewrap>img.flimg{width:100%;height:100%;object-fit:contain;display:block;position:relative;
+  animation:flick 3.6s ease-in-out infinite}
+.flamewrap>img.fl-clair{display:none}
+html[data-theme="light"] .flamewrap>img.fl-sombre{display:none}
+html[data-theme="light"] .flamewrap>img.fl-clair{display:block}
 .wordmark{line-height:1.1}
 .wordmark b{display:block;font-size:13.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--w);font-weight:700}
 .wordmark i{display:block;font-style:normal;font-size:9.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--g3);margin-top:2px}
@@ -1013,8 +1054,8 @@ sup.tm{font-size:.52em;vertical-align:super;line-height:0;letter-spacing:0;margi
   <div class="hin">
     <span class="mark">
       <span class="flamewrap">
-        <svg class="ringspin" viewBox="0 0 46 46" aria-hidden="true"><circle cx="23" cy="23" r="21.4"/></svg>
-        <svg class="fl" viewBox="0 0 100.0 126.32" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M47.79 0.54 C45.86 0.9 44.33 2.11 39.85 6.68 C33.86 12.84 29.77 19.79 28.66 25.68 C27.13 33.92 28.18 38.95 33.56 49.08 C38.32 57.98 37.8 64.84 32.21 67.97 C26.38 71.25 18.92 67.01 18.92 60.42 C18.92 54.11 11.58 52.03 7.67 57.2 C2.35 64.24 0 74.17 1.29 84.03 C1.59 86.38 2.29 89.83 2.68 90.95 C2.74 91.1 2.95 91.82 3.16 92.51 C7.97 108.33 22.17 121.41 38.11 124.75 C45.2 126.23 51.13 126.32 57.65 125.08 C59.19 124.78 59.67 124.69 60.54 124.45 C84.69 118.23 100 94.74 95.82 70.38 C94.02 60.06 87.31 49.65 76.78 40.93 C65.68 31.73 58.23 20.3 55.19 7.76 C54.95 6.77 54.68 5.59 54.59 5.17 C53.83 2.08 50.77 0 47.79 0.54 zM45.95 18.44 C46.05 18.59 46.38 19.4 46.71 20.27 C51.13 31.34 58.8 41.62 68.96 50.05 C76.42 56.24 81.2 62.71 83.16 69.29 C83.31 69.77 83.46 70.32 83.52 70.5 C83.76 71.22 84.18 73.44 84.36 74.83 C86.44 91.7 73.68 109.53 57.11 112.96 C53.23 113.74 52.36 113.86 48.75 113.86 C44.78 113.86 43.19 113.65 39.49 112.72 C29.17 110.08 19.88 102.02 15.76 92.09 C14.41 88.81 13.53 85.44 13.11 81.86 C12.96 80.39 12.9 76.27 13.05 75.76 C13.17 75.28 13.35 75.34 14.29 76.15 C21.92 82.8 33.83 82.77 41.44 76.09 C47.97 70.38 50.14 62.53 47.91 52.57 C47.4 50.29 44.9 44.24 43.94 43.01 C43.73 42.74 41.68 38.62 41.38 37.89 C38.89 31.7 39.97 25.77 44.72 19.37 C45.68 18.08 45.74 18.02 45.95 18.44 z"/></svg>
+        <img class="flimg fl-sombre" src="logo-flamme-sombre.png" alt="" width="46" height="46" decoding="async">
+        <img class="flimg fl-clair"  src="logo-flamme-clair.png"  alt="" width="46" height="46" decoding="async">
       </span>
       <span class="wordmark"><b>PYROS<sup class="tm">™</sup></b><i>Accompagnement</i></span>
     </span>
@@ -1438,7 +1479,8 @@ sup.tm{font-size:.52em;vertical-align:super;line-height:0;letter-spacing:0;margi
 
 <footer>
   <div class="wrap">
-    <span class="flamewrap foot"><svg class="ringspin" viewBox="0 0 46 46" aria-hidden="true"><circle cx="23" cy="23" r="21.4"/></svg><svg class="fl" viewBox="0 0 100.0 126.32" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M47.79 0.54 C45.86 0.9 44.33 2.11 39.85 6.68 C33.86 12.84 29.77 19.79 28.66 25.68 C27.13 33.92 28.18 38.95 33.56 49.08 C38.32 57.98 37.8 64.84 32.21 67.97 C26.38 71.25 18.92 67.01 18.92 60.42 C18.92 54.11 11.58 52.03 7.67 57.2 C2.35 64.24 0 74.17 1.29 84.03 C1.59 86.38 2.29 89.83 2.68 90.95 C2.74 91.1 2.95 91.82 3.16 92.51 C7.97 108.33 22.17 121.41 38.11 124.75 C45.2 126.23 51.13 126.32 57.65 125.08 C59.19 124.78 59.67 124.69 60.54 124.45 C84.69 118.23 100 94.74 95.82 70.38 C94.02 60.06 87.31 49.65 76.78 40.93 C65.68 31.73 58.23 20.3 55.19 7.76 C54.95 6.77 54.68 5.59 54.59 5.17 C53.83 2.08 50.77 0 47.79 0.54 zM45.95 18.44 C46.05 18.59 46.38 19.4 46.71 20.27 C51.13 31.34 58.8 41.62 68.96 50.05 C76.42 56.24 81.2 62.71 83.16 69.29 C83.31 69.77 83.46 70.32 83.52 70.5 C83.76 71.22 84.18 73.44 84.36 74.83 C86.44 91.7 73.68 109.53 57.11 112.96 C53.23 113.74 52.36 113.86 48.75 113.86 C44.78 113.86 43.19 113.65 39.49 112.72 C29.17 110.08 19.88 102.02 15.76 92.09 C14.41 88.81 13.53 85.44 13.11 81.86 C12.96 80.39 12.9 76.27 13.05 75.76 C13.17 75.28 13.35 75.34 14.29 76.15 C21.92 82.8 33.83 82.77 41.44 76.09 C47.97 70.38 50.14 62.53 47.91 52.57 C47.4 50.29 44.9 44.24 43.94 43.01 C43.73 42.74 41.68 38.62 41.38 37.89 C38.89 31.7 39.97 25.77 44.72 19.37 C45.68 18.08 45.74 18.02 45.95 18.44 z"/></svg></span>
+    <span class="flamewrap foot"><img class="flimg fl-sombre" src="logo-flamme-sombre.png" alt="" width="46" height="46" decoding="async">
+        <img class="flimg fl-clair"  src="logo-flamme-clair.png"  alt="" width="46" height="46" decoding="async"></span>
     <p class="fname"><b>PYROS Accompagnement<sup class="tm">™</sup></b></p>
     <p class="ftag">Cabinet de conseil en rentabilité et structuration pour les restaurants et les métiers de bouche.<br><b>France et Suisse romande, déplacements sur site.</b></p>
     <div class="fcols" id="fcols"></div>
@@ -3225,17 +3267,56 @@ const painBand = (function(){
    Le thème est appliqué avant le rendu (script en tête de <head>)
    pour éviter tout clignotement. Ici on gère seulement le bouton. */
 (function(){
+  var T = window.PYROS_THEME || {};
   var btn = document.getElementById('themeBtn');
-  var meta = document.querySelector('meta[name="theme-color"]');
-  function apply(mode){
-    document.documentElement.setAttribute('data-theme', mode);
-    if(meta) meta.setAttribute('content', mode === 'light' ? '#FFFFFF' : '#050A18');
-    if(btn) btn.setAttribute('aria-pressed', mode === 'light');
-    try{ localStorage.setItem('pyros-theme', mode); }catch(e){}
-  }
+
+  /* clic sur le bouton : choix explicite, il prime ensuite sur l'appareil */
   if(btn) btn.addEventListener('click', function(){
-    apply(document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    var mode = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    try{ localStorage.setItem('pyros-theme', mode); }catch(e){}
+    if(T.paint) T.paint(mode);
   });
+
+  /* appui long : revient au reglage de l'appareil */
+  if(btn){
+    var t = null;
+    var start = function(){ t = setTimeout(function(){
+      try{ localStorage.removeItem('pyros-theme'); }catch(e){}
+      if(T.resolve) T.resolve();
+    }, 700); };
+    var stop = function(){ if(t){ clearTimeout(t); t = null; } };
+    btn.addEventListener('touchstart', start, {passive:true});
+    btn.addEventListener('touchend', stop);
+    btn.addEventListener('touchcancel', stop);
+    btn.addEventListener('mousedown', start);
+    btn.addEventListener('mouseup', stop);
+    btn.addEventListener('mouseleave', stop);
+  }
+
+  if(!T.resolve) return;
+
+  /* suit le basculement systeme en direct, tant qu'aucun choix n'est enregistre */
+  if(window.matchMedia){
+    try{
+      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      var onChange = function(){ if(!T.saved()) T.resolve(); };
+      if(mq.addEventListener) mq.addEventListener('change', onChange);
+      else if(mq.addListener) mq.addListener(onChange);
+    }catch(e){}
+  }
+
+  /* Les navigateurs integres (Instagram, Facebook, TikTok) repondent parfois
+     mal a la premiere lecture, avant que la webvue soit totalement initialisee.
+     On repose la question aux moments ou la reponse devient fiable. */
+  var recheck = function(){ if(!T.saved()) T.resolve(); };
+  document.addEventListener('DOMContentLoaded', recheck);
+  window.addEventListener('load', recheck);
+  window.addEventListener('pageshow', recheck);
+  document.addEventListener('visibilitychange', function(){
+    if(!document.hidden) recheck();
+  });
+  setTimeout(recheck, 120);
+  setTimeout(recheck, 600);
 })();
 </script>
 
