@@ -26,10 +26,10 @@
 <!-- ── Favicon : fichiers réels, indispensables pour que Google affiche la flamme ──
      Google ignore les favicons en data:URI. Ces fichiers doivent être à la racine du site. -->
 <link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
-<link rel="icon" type="image/png" sizes="48x48" href="icon-48.png">
-<link rel="icon" type="image/png" sizes="96x96" href="icon-96.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="img/png" sizes="32x32" href="icon-32.png">
+<link rel="icon" type="img/png" sizes="48x48" href="icon-48.png">
+<link rel="icon" type="img/png" sizes="96x96" href="icon-96.png">
+<link rel="icon" type="img/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <link rel="canonical" href="https://pyrosunivers.com/">
@@ -2068,7 +2068,9 @@ section,.metiers,.panneau,.defile,.bandechiffres{background-color:transparent}
 #intro .in{visibility:hidden}
 .wmsvg{height:27px;width:auto}
 </style>
-<script src="pyros-pwa.js" defer></script>
+<script>/* purge des anciennes versions en cache (service worker) */
+(function(){try{if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(x){x.unregister();});}).catch(function(){});}
+if(window.caches&&caches.keys){caches.keys().then(function(k){k.forEach(function(n){caches.delete(n);});}).catch(function(){});}}catch(e){}})();</script>
 </head>
 <body>
 <style id="verrouintro">html,body{overflow:hidden}</style>
@@ -3105,41 +3107,41 @@ const METIERS = [
    la tuile reste lisible au lieu d'afficher un carré vide. */
 const TUILES = [
  {cat:"Salle & cuisine", nom:"Restaurants et brasseries", lien:"metier-restaurants.html",
-  photo:"url('image/resto-01.webp')",
-  vues:["image/resto-01.webp","image/resto-02.webp","image/resto-03.webp","image/resto-04.webp","image/resto-05.webp","image/resto-06.webp","image/resto-07.webp","image/resto-08.webp","image/resto-09.webp","image/resto-10.webp","image/resto-11.webp","image/resto-12.webp","image/resto-13.webp","image/resto-14.webp","image/resto-15.webp","image/resto-16.webp","image/resto-17.webp","image/resto-18.webp","image/resto-19.webp","image/resto-20.webp","image/resto-21.webp","image/resto-22.webp","image/resto-23.webp","image/resto-24.webp","image/resto-25.webp","image/resto-26.webp","image/resto-27.webp","image/resto-28.webp","image/resto-29.webp","image/resto-30.webp","image/resto-31.webp","image/resto-32.webp","image/resto-33.webp","image/resto-34.webp"]},
+  photo:"url('img/resto-01.webp')",
+  vues:["img/resto-01.webp","img/resto-02.webp","img/resto-03.webp","img/resto-04.webp","img/resto-05.webp","img/resto-06.webp","img/resto-07.webp","img/resto-08.webp","img/resto-09.webp","img/resto-10.webp","img/resto-11.webp","img/resto-12.webp","img/resto-13.webp","img/resto-14.webp","img/resto-15.webp","img/resto-16.webp","img/resto-17.webp","img/resto-18.webp","img/resto-19.webp","img/resto-20.webp","img/resto-21.webp","img/resto-22.webp","img/resto-23.webp","img/resto-24.webp","img/resto-25.webp","img/resto-26.webp","img/resto-27.webp","img/resto-28.webp","img/resto-29.webp","img/resto-30.webp","img/resto-31.webp","img/resto-32.webp","img/resto-33.webp","img/resto-34.webp"]},
  {cat:"Comptoir",        nom:"Bars et coffee shops",      lien:"metier-bars.html",
-  photo:"url('image/bar-01.webp')",
-  vues:["image/bar-01.webp","image/bar-02.webp","image/bar-03.webp","image/bar-04.webp","image/bar-05.webp","image/bar-06.webp","image/bar-07.webp","image/bar-08.webp","image/bar-09.webp","image/bar-10.webp","image/bar-11.webp","image/bar-12.webp","image/bar-13.webp","image/bar-14.webp","image/bar-15.webp","image/bar-16.webp"]},
+  photo:"url('img/bar-01.webp')",
+  vues:["img/bar-01.webp","img/bar-02.webp","img/bar-03.webp","img/bar-04.webp","img/bar-05.webp","img/bar-06.webp","img/bar-07.webp","img/bar-08.webp","img/bar-09.webp","img/bar-10.webp","img/bar-11.webp","img/bar-12.webp","img/bar-13.webp","img/bar-14.webp","img/bar-15.webp","img/bar-16.webp"]},
  {cat:"Chambres",        nom:"Hôtels",                    lien:"metier-hotels.html",
-  photo:"url('image/hotel-01.webp')",
-  vues:["image/hotel-01.webp","image/hotel-02.webp","image/hotel-03.webp","image/hotel-04.webp","image/hotel-05.webp","image/hotel-06.webp","image/hotel-07.webp","image/hotel-08.webp","image/hotel-09.webp","image/hotel-10.webp","image/hotel-11.webp","image/hotel-12.webp","image/hotel-13.webp","image/hotel-14.webp","image/hotel-15.webp","image/hotel-16.webp","image/hotel-17.webp","image/hotel-18.webp","image/hotel-19.webp","image/hotel-20.webp","image/hotel-21.webp","image/hotel-22.webp","image/hotel-23.webp","image/hotel-24.webp","image/hotel-25.webp","image/hotel-26.webp","image/hotel-27.webp","image/hotel-28.webp"]},
+  photo:"url('img/hotel-01.webp')",
+  vues:["img/hotel-01.webp","img/hotel-02.webp","img/hotel-03.webp","img/hotel-04.webp","img/hotel-05.webp","img/hotel-06.webp","img/hotel-07.webp","img/hotel-08.webp","img/hotel-09.webp","img/hotel-10.webp","img/hotel-11.webp","img/hotel-12.webp","img/hotel-13.webp","img/hotel-14.webp","img/hotel-15.webp","img/hotel-16.webp","img/hotel-17.webp","img/hotel-18.webp","img/hotel-19.webp","img/hotel-20.webp","img/hotel-21.webp","img/hotel-22.webp","img/hotel-23.webp","img/hotel-24.webp","img/hotel-25.webp","img/hotel-26.webp","img/hotel-27.webp","img/hotel-28.webp"]},
  {cat:"Laboratoire",     nom:"Boulangeries et pâtisseries", lien:"metier-boulangeries.html",
-  photo:"url('image/boul-16.webp')",
-  vues:["image/boul-16.webp","image/boul-15.webp","image/boul-25.webp","image/boul-30.webp","image/boul-28.webp","image/boul-31.webp","image/boul-26.webp","image/boul-05.webp","image/boul-14.webp","image/boul-27.webp","image/boul-24.webp","image/boul-13.webp","image/boul-21.webp","image/boul-06.webp","image/boul-23.webp","image/boul-12.webp","image/boul-04.webp","image/boul-29.webp","image/boul-10.webp","image/boul-20.webp","image/boul-22.webp","image/boul-02.webp","image/boul-17.webp","image/boul-11.webp","image/boul-03.webp","image/boul-19.webp","image/boul-01.webp","image/boul-18.webp","image/boul-08.webp","image/boul-09.webp","image/boul-07.webp"]},
+  photo:"url('img/boul-16.webp')",
+  vues:["img/boul-16.webp","img/boul-15.webp","img/boul-25.webp","img/boul-30.webp","img/boul-28.webp","img/boul-31.webp","img/boul-26.webp","img/boul-05.webp","img/boul-14.webp","img/boul-27.webp","img/boul-24.webp","img/boul-13.webp","img/boul-21.webp","img/boul-06.webp","img/boul-23.webp","img/boul-12.webp","img/boul-04.webp","img/boul-29.webp","img/boul-10.webp","img/boul-20.webp","img/boul-22.webp","img/boul-02.webp","img/boul-17.webp","img/boul-11.webp","img/boul-03.webp","img/boul-19.webp","img/boul-01.webp","img/boul-18.webp","img/boul-08.webp","img/boul-09.webp","img/boul-07.webp"]},
  {cat:"Production",      nom:"Traiteurs et dark kitchens", lien:"metier-traiteurs.html",
-  photo:"url('image/trait-09.webp')",
-  vues:["image/trait-09.webp","image/trait-06.webp","image/trait-14.webp","image/trait-08.webp","image/trait-07.webp","image/trait-10.webp","image/trait-17.webp","image/trait-16.webp","image/trait-12.webp","image/trait-02.webp","image/trait-15.webp","image/trait-04.webp","image/trait-13.webp","image/trait-03.webp","image/trait-05.webp","image/trait-01.webp","image/trait-11.webp"]},
+  photo:"url('img/trait-09.webp')",
+  vues:["img/trait-09.webp","img/trait-06.webp","img/trait-14.webp","img/trait-08.webp","img/trait-07.webp","img/trait-10.webp","img/trait-17.webp","img/trait-16.webp","img/trait-12.webp","img/trait-02.webp","img/trait-15.webp","img/trait-04.webp","img/trait-13.webp","img/trait-03.webp","img/trait-05.webp","img/trait-01.webp","img/trait-11.webp"]},
  {cat:"Seul à bord",     nom:"Chefs à domicile et indépendants", lien:"metier-independants.html",
-  photo:"url('image/chef-06.webp')",
-  vues:["image/chef-06.webp","image/chef-02.webp","image/chef-09.webp","image/chef-14.webp","image/chef-13.webp","image/chef-07.webp","image/chef-04.webp","image/chef-18.webp","image/chef-11.webp","image/chef-10.webp","image/chef-16.webp","image/chef-12.webp","image/chef-05.webp","image/chef-17.webp","image/chef-01.webp","image/chef-15.webp","image/chef-03.webp","image/chef-08.webp"]},
+  photo:"url('img/chef-06.webp')",
+  vues:["img/chef-06.webp","img/chef-02.webp","img/chef-09.webp","img/chef-14.webp","img/chef-13.webp","img/chef-07.webp","img/chef-04.webp","img/chef-18.webp","img/chef-11.webp","img/chef-10.webp","img/chef-16.webp","img/chef-12.webp","img/chef-05.webp","img/chef-17.webp","img/chef-01.webp","img/chef-15.webp","img/chef-03.webp","img/chef-08.webp"]},
  {cat:"Boutique",        nom:"Épiceries fines et chocolatiers", lien:"metier-epiceries.html",
-  photo:"url('image/epic-11.webp')",
-  vues:["image/epic-11.webp","image/epic-13.webp","image/epic-04.webp","image/epic-05.webp","image/epic-10.webp","image/epic-12.webp","image/epic-06.webp","image/epic-09.webp","image/epic-01.webp","image/epic-07.webp","image/epic-03.webp","image/epic-02.webp","image/epic-08.webp","image/epic-15.webp","image/epic-14.webp","image/epic-16.webp"]},
+  photo:"url('img/epic-11.webp')",
+  vues:["img/epic-11.webp","img/epic-13.webp","img/epic-04.webp","img/epic-05.webp","img/epic-10.webp","img/epic-12.webp","img/epic-06.webp","img/epic-09.webp","img/epic-01.webp","img/epic-07.webp","img/epic-03.webp","img/epic-02.webp","img/epic-08.webp","img/epic-15.webp","img/epic-14.webp","img/epic-16.webp"]},
  {cat:"Métiers de bouche", nom:"Boucheries et poissonneries", lien:"metier-boucheries.html",
-  photo:"url('image/bouch-09.webp')",
-  vues:["image/bouch-09.webp","image/bouch-14.webp","image/bouch-08.webp","image/bouch-06.webp","image/bouch-15.webp","image/bouch-03.webp","image/bouch-12.webp","image/bouch-02.webp","image/bouch-17.webp","image/bouch-05.webp","image/bouch-04.webp","image/bouch-13.webp","image/bouch-07.webp","image/bouch-10.webp","image/bouch-18.webp","image/bouch-11.webp","image/bouch-01.webp","image/bouch-16.webp"]},
+  photo:"url('img/bouch-09.webp')",
+  vues:["img/bouch-09.webp","img/bouch-14.webp","img/bouch-08.webp","img/bouch-06.webp","img/bouch-15.webp","img/bouch-03.webp","img/bouch-12.webp","img/bouch-02.webp","img/bouch-17.webp","img/bouch-05.webp","img/bouch-04.webp","img/bouch-13.webp","img/bouch-07.webp","img/bouch-10.webp","img/bouch-18.webp","img/bouch-11.webp","img/bouch-01.webp","img/bouch-16.webp"]},
  {cat:"Sucré", nom:"Glaciers et confiseurs", lien:"metier-glaciers.html",
-  photo:"url('image/glace-01.webp')",
-  vues:["image/glace-01.webp","image/conf-01.webp","image/glace-02.webp","image/conf-02.webp","image/glace-03.webp","image/conf-03.webp","image/glace-04.webp","image/conf-04.webp","image/glace-05.webp","image/conf-05.webp","image/glace-06.webp","image/conf-06.webp","image/glace-07.webp","image/conf-07.webp","image/glace-08.webp","image/conf-08.webp","image/glace-09.webp","image/glace-10.webp","image/glace-11.webp","image/glace-12.webp","image/glace-13.webp","image/glace-14.webp","image/glace-15.webp","image/glace-16.webp"]},
+  photo:"url('img/glace-01.webp')",
+  vues:["img/glace-01.webp","img/conf-01.webp","img/glace-02.webp","img/conf-02.webp","img/glace-03.webp","img/conf-03.webp","img/glace-04.webp","img/conf-04.webp","img/glace-05.webp","img/conf-05.webp","img/glace-06.webp","img/conf-06.webp","img/glace-07.webp","img/conf-07.webp","img/glace-08.webp","img/conf-08.webp","img/glace-09.webp","img/glace-10.webp","img/glace-11.webp","img/glace-12.webp","img/glace-13.webp","img/glace-14.webp","img/glace-15.webp","img/glace-16.webp"]},
  {cat:"Four", nom:"Pizzerias", lien:"metier-pizzerias.html",
-  photo:"url('image/pizza-01.webp')",
-  vues:["image/pizza-01.webp","image/pizza-02.webp","image/pizza-03.webp","image/pizza-04.webp","image/pizza-05.webp","image/pizza-06.webp","image/pizza-07.webp","image/pizza-08.webp","image/pizza-09.webp","image/pizza-10.webp","image/pizza-11.webp","image/pizza-12.webp","image/pizza-13.webp","image/pizza-14.webp","image/pizza-15.webp","image/pizza-16.webp"]},
+  photo:"url('img/pizza-01.webp')",
+  vues:["img/pizza-01.webp","img/pizza-02.webp","img/pizza-03.webp","img/pizza-04.webp","img/pizza-05.webp","img/pizza-06.webp","img/pizza-07.webp","img/pizza-08.webp","img/pizza-09.webp","img/pizza-10.webp","img/pizza-11.webp","img/pizza-12.webp","img/pizza-13.webp","img/pizza-14.webp","img/pizza-15.webp","img/pizza-16.webp"]},
  {cat:"Rapide", nom:"Snacking et street food", lien:"metier-snacking.html",
-  photo:"url('image/snack-06.webp')",
-  vues:["image/snack-06.webp","image/snack-36.webp","image/snack-13.webp","image/snack-20.webp","image/snack-16.webp","image/snack-11.webp","image/snack-31.webp","image/snack-22.webp","image/snack-09.webp","image/snack-12.webp","image/snack-40.webp","image/snack-01.webp","image/snack-29.webp","image/snack-15.webp","image/snack-39.webp","image/snack-19.webp","image/snack-23.webp","image/snack-32.webp","image/snack-28.webp","image/snack-25.webp","image/snack-18.webp","image/snack-33.webp","image/snack-08.webp","image/snack-27.webp","image/snack-38.webp","image/snack-14.webp","image/snack-03.webp","image/snack-02.webp","image/snack-34.webp","image/snack-17.webp","image/snack-30.webp","image/snack-37.webp","image/snack-24.webp","image/snack-07.webp","image/snack-35.webp","image/snack-05.webp","image/snack-04.webp","image/snack-26.webp","image/snack-10.webp","image/snack-21.webp"]},
+  photo:"url('img/snack-06.webp')",
+  vues:["img/snack-06.webp","img/snack-36.webp","img/snack-13.webp","img/snack-20.webp","img/snack-16.webp","img/snack-11.webp","img/snack-31.webp","img/snack-22.webp","img/snack-09.webp","img/snack-12.webp","img/snack-40.webp","img/snack-01.webp","img/snack-29.webp","img/snack-15.webp","img/snack-39.webp","img/snack-19.webp","img/snack-23.webp","img/snack-32.webp","img/snack-28.webp","img/snack-25.webp","img/snack-18.webp","img/snack-33.webp","img/snack-08.webp","img/snack-27.webp","img/snack-38.webp","img/snack-14.webp","img/snack-03.webp","img/snack-02.webp","img/snack-34.webp","img/snack-17.webp","img/snack-30.webp","img/snack-37.webp","img/snack-24.webp","img/snack-07.webp","img/snack-35.webp","img/snack-05.webp","img/snack-04.webp","img/snack-26.webp","img/snack-10.webp","img/snack-21.webp"]},
  {cat:"Séjour", nom:"Gîtes et chambres d'hôtes", lien:"metier-gites.html",
-  photo:"url('image/gite-01.webp')",
-  vues:["image/gite-01.webp","image/gite-02.webp","image/gite-03.webp","image/gite-04.webp","image/gite-05.webp","image/gite-06.webp","image/gite-07.webp","image/gite-08.webp","image/gite-09.webp","image/gite-10.webp","image/gite-11.webp","image/gite-12.webp","image/gite-13.webp","image/gite-14.webp","image/gite-15.webp","image/gite-16.webp","image/gite-17.webp","image/gite-18.webp","image/gite-19.webp"]}
+  photo:"url('img/gite-01.webp')",
+  vues:["img/gite-01.webp","img/gite-02.webp","img/gite-03.webp","img/gite-04.webp","img/gite-05.webp","img/gite-06.webp","img/gite-07.webp","img/gite-08.webp","img/gite-09.webp","img/gite-10.webp","img/gite-11.webp","img/gite-12.webp","img/gite-13.webp","img/gite-14.webp","img/gite-15.webp","img/gite-16.webp","img/gite-17.webp","img/gite-18.webp","img/gite-19.webp"]}
 ];
 
 const METIERS_PHRASE = "Si vous achetez de la matière première et que vous la revendez transformée, la méthode s'applique. France et Suisse romande.";
