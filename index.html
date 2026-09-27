@@ -64,7 +64,7 @@
     return null;                      /* preference inconnue */
   };
 
-  W.PYROS_THEME.saved = function(){ return 'dark';
+  W.PYROS_THEME.saved = function(){
     var m = null;
     try{ m = localStorage.getItem('pyros-theme'); }catch(e){}
     return (m === 'light' || m === 'dark') ? m : null;
@@ -82,7 +82,7 @@
 
   /* resout et applique, sans jamais ecraser un choix explicite */
   W.PYROS_THEME.resolve = function(){
-    var m = 'dark';   /* mode clair retire : le site est sombre, point */
+    var m = W.PYROS_THEME.saved() || 'dark';
     W.PYROS_THEME.paint(m);
     return m;
   };
@@ -1187,7 +1187,7 @@ html[data-theme="light"] .bgfx:after{opacity:.55;
 html[data-theme="light"] .grain{opacity:0}
 html[data-theme="light"] .aura{display:none}
 html[data-theme="light"] #prog{box-shadow:0 0 16px rgba(0,0,0,.35)}
-html[data-theme="light"] header{background:rgba(255,255,255,.9)}
+html[data-theme="light"] header{background:transparent}
 html[data-theme="light"] .flamewrap>svg.fl{filter:none}
 
 /* dégradés sombres codés en dur → équivalents clairs */
@@ -1274,9 +1274,9 @@ h2{font-size:clamp(28px,3.9vw,50px);line-height:1.2;max-width:22ch;color:var(--w
 h3{font-size:clamp(17px,1.5vw,20px);line-height:1.35;color:var(--w);font-weight:400 !important;letter-spacing:0 !important}
 .dim{color:var(--g3)}                    /* la seconde moitié du titre */
 
-/* pas de machine à écrire : le texte est posé, entier */
+/* machine à écrire réactivée (sans curseur) */
 .tw:after{display:none !important}
-.tw .ch{opacity:1 !important}
+.tw .ch{transition:opacity .25s ease}
 
 /* ─── accroche « — LABEL » ─── */
 .kick{display:flex;align-items:center;gap:0;font-size:10.5px;letter-spacing:.26em;
@@ -2061,8 +2061,9 @@ section,.metiers,.panneau,.defile,.bandechiffres{background-color:transparent}
 
 /* échelle bureau : rendu identique à l'aperçu, sans grossir sur grands écrans */
 :root{--z:1}
-@media (min-width:1200px){html{zoom:.8}:root{--z:.8}}
-@media (min-width:1700px){html{zoom:.74}:root{--z:.74}}
+@media (min-width:1200px){html{zoom:.76}:root{--z:.76}}
+@media (min-width:1440px){html{zoom:.68}:root{--z:.68}}
+@media (min-width:1700px){html{zoom:.62}:root{--z:.62}}
 
 /* anti-flash intro : contenu masque jusqu'au chargement de ses styles */
 #intro .in{visibility:hidden}
@@ -2071,7 +2072,8 @@ section,.metiers,.panneau,.defile,.bandechiffres{background-color:transparent}
 <script>/* purge des anciennes versions en cache (service worker) */
 (function(){try{if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(x){x.unregister();});}).catch(function(){});}
 if(window.caches&&caches.keys){caches.keys().then(function(k){k.forEach(function(n){caches.delete(n);});}).catch(function(){});}}catch(e){}})();</script>
-</head>
+<script>(function(){try{var z=parseFloat(new URLSearchParams(location.search).get('z'));
+if(z>0.3&&z<=1.5){var d=document.documentElement;d.style.zoom=z;d.style.setProperty('--z',z);}}catch(e){}})();</script></head>
 <body>
 <style id="verrouintro">html,body{overflow:hidden}</style>
 <!-- Degrades orange en unites utilisateur : un trait horizontal a une
@@ -2084,8 +2086,8 @@ if(window.caches&&caches.keys){caches.keys().then(function(k){k.forEach(function
   <linearGradient id="pyrIco64" gradientUnits="userSpaceOnUse" x1="10" y1="8" x2="54" y2="58">
     <stop offset="0" stop-color="#F8CB55"/><stop offset="1" stop-color="#E47D1C"/>
   </linearGradient>
-  <linearGradient id="pyrRing" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="200">
-    <stop offset="0" stop-color="#F0A24A"/><stop offset="50%" stop-color="#E8752A"/><stop offset="1" stop-color="#CD5E1E"/>
+  <linearGradient id="pyrRing" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="240">
+    <stop offset="0" stop-color="#FFD84A"/><stop offset="45%" stop-color="#FFA41B"/><stop offset="1" stop-color="#FF6A00"/>
   </linearGradient>
   </defs></svg>
 
@@ -2194,7 +2196,7 @@ if(window.caches&&caches.keys){caches.keys().then(function(k){k.forEach(function
 <section class="metiers aG" id="metiers" aria-label="Qui on accompagne">
   <div class="wrap">
     <p class="mkick">Qui on accompagne</p>
-    <h2 class="mtitre">À qui on parle.</h2>
+    <h2 class="mtitre tw rv">À qui on parle.</h2>
     <div class="mgrid" id="mgrid"></div>
     <ul class="msr" id="msr"></ul>
     <p class="mline" id="mline"></p>
@@ -2296,7 +2298,7 @@ if(window.caches&&caches.keys){caches.keys().then(function(k){k.forEach(function
     <div class="fgrid">
       <div class="ftexte">
         <p class="kick">Derrière PYROS</p>
-        <h2>Angelo Zeffane — de cuisinier à consultant.</h2>
+        <h2 class="tw rv">Angelo Zeffane — de cuisinier à consultant.</h2>
 
         <p class="fintro">Chef expérimenté. De la cuisine à la pâtisserie,
           en passant par les Compagnons, la charcuterie-traiteur et la Suisse —
@@ -4400,22 +4402,29 @@ const painBand = (function(){
 (function(){
   const hdr = $("#hdr"), prog = $("#prog"), mbar = $("#mbar"), hero = $("#top");
   let lastY = 0, raf = null;
-  function setHH(){ document.documentElement.style.setProperty("--hh", hdr.offsetHeight + "px"); }
+  /* mesures mises en cache : plus aucune lecture de mise en page à chaque image de défilement */
+  let hhVal = -1, docH = 0, heroH = 0;
+  function setHH(){ const v = hdr.offsetHeight; if(v !== hhVal){ hhVal = v; document.documentElement.style.setProperty("--hh", v + "px"); } }
+  function mesure(){ docH = document.body.scrollHeight - window.innerHeight; heroH = hero.offsetHeight; setHH(); }
+  let st = {};
+  function bascule(el, cls, on){ if(el.classList.contains(cls) !== on) el.classList.toggle(cls, on); }
+  prog.style.width = "100%"; prog.style.transformOrigin = "0 50%"; prog.style.willChange = "transform";
   function maj(){
     raf = null;
     const y = window.scrollY;
-    const h = document.body.scrollHeight - window.innerHeight;
-    prog.style.width = (h > 0 ? y / h * 100 : 0) + "%";
-    hdr.classList.toggle("up", y > 340 && y > lastY + 5);
-    hdr.classList.toggle("haut", y < 40);
-    if(mbar) mbar.classList.toggle("on", y > hero.offsetHeight * .75);
-    painBand.show(y > hero.offsetHeight * .6);
-    setHH();
+    prog.style.transform = "scaleX(" + (docH > 0 ? Math.min(1, y / docH) : 0) + ")";
+    bascule(hdr, "up", y > 340 && y > lastY + 5);
+    bascule(hdr, "haut", y < 40);
+    if(mbar) bascule(mbar, "on", y > heroH * .75);
+    const pb = y > heroH * .6; if(st.pb !== pb){ st.pb = pb; painBand.show(pb); }
     lastY = y;
   }
   window.addEventListener("scroll", () => { if(!raf) raf = requestAnimationFrame(maj); }, {passive:true});
-  window.addEventListener("resize", setHH);
-  setHH(); maj();
+  window.addEventListener("resize", () => { mesure(); maj(); });
+  window.addEventListener("load", mesure);
+  if(window.ResizeObserver) new ResizeObserver(() => { mesure(); }).observe(document.body);
+  setInterval(setHH, 1000);
+  mesure(); maj();
 })();
 
 /* ════════ TITRE ANIMÉ ════════ */
@@ -5504,8 +5513,9 @@ h2+.sub{margin-top:20px}
 .intro .ibtn{background:#0A0A0A !important;color:#fff !important;animation-delay:4.35s !important}
 
 /* tuiles métiers : taille d'origine, hors réduction 20 % */
-@media (min-width:1200px){#metiers,#constat{zoom:1.25;--z:1}}
-@media (min-width:1700px){#metiers,#constat{zoom:1.3514;--z:1}}
+@media (min-width:1200px){#metiers,#constat{zoom:1.13;--z:.86}}
+@media (min-width:1440px){#metiers,#constat{zoom:1.15;--z:.78}}
+@media (min-width:1700px){#metiers,#constat{zoom:1.16;--z:.72}}
 
 /* tuiles métiers : cadre orange + zoom au survol */
 .mtuile{transition:transform .5s cubic-bezier(.22,1,.36,1),box-shadow .5s cubic-bezier(.22,1,.36,1)}
@@ -5531,6 +5541,414 @@ h2+.sub{margin-top:20px}
 .gnote{font-size:13px;color:var(--g3);margin:22px 0 0}
 @media(max-width:980px){.mgam{grid-template-columns:1fr}}
 #intro .in{visibility:visible}
+
+/* ══ TEST FOND BLANC ══ */
+html[data-theme="light"],html[data-theme="light"] body{background:#FFFFFF !important}
+html[data-theme="light"] #zones .card,html[data-theme="light"] #preuve .card,html[data-theme="light"] .prob,
+html[data-theme="light"] .card.zc,html[data-theme="light"] .card.acc,html[data-theme="light"] .casec,html[data-theme="light"] .jc,
+html[data-theme="light"] .canal,html[data-theme="light"] .pslide,html[data-theme="light"] #qbox{
+  background:#FFFFFF !important;border:1px solid rgba(0,0,0,.10) !important;box-shadow:0 10px 30px rgba(0,0,0,.05) !important}
+
+html[data-theme="light"] #hdr .wordmark,html[data-theme="light"] #hdr .wmsvg{color:#0A0A0A !important}
+html[data-theme="light"] #hdr .menubtn,html[data-theme="light"] #hdr button{color:#0A0A0A !important;border-color:rgba(0,0,0,.25) !important;background:rgba(255,255,255,.7) !important}
+html[data-theme="light"] #hdr.haut .wordmark,html[data-theme="light"] #hdr.haut .wmsvg{color:#FFFFFF !important}
+html[data-theme="light"] #hdr.haut .menubtn,html[data-theme="light"] #hdr.haut button{color:#FFFFFF !important;border-color:rgba(255,255,255,.3) !important;background:transparent !important}
+
+
+/* bandeau en gras, textes des tuiles un peu plus petits */
+.drow span{font-weight:600 !important}
+.mtuile .nom{font-size:clamp(18px,1.7vw,24px) !important}
+.mtuile .cat{font-size:10px !important}
+
+/* menu : même bande blanche que l'en-tête */
+html[data-theme="light"] .menupan{background:rgba(255,255,255,.96) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
+html[data-theme="light"] .menupan.on{border-bottom:1px solid rgba(0,0,0,.08) !important;box-shadow:0 12px 30px rgba(0,0,0,.06)}
+html[data-theme="light"] .menupan .hbtn:not(.act){color:#1A1A1A !important;border-left-color:rgba(0,0,0,.08) !important;background:none !important}
+html[data-theme="light"] .menupan .hbtn:not(.act):hover{color:#000 !important}
+html[data-theme="light"] .menupied{border-top:1px solid rgba(0,0,0,.08) !important;background:none !important}
+html[data-theme="light"] .lang .lg{color:#6B6B6B !important}
+html[data-theme="light"] .lang .lg.on,html[data-theme="light"] .lang .lg:hover{color:#0A0A0A !important}
+html[data-theme="light"] .lang span{color:#6B6B6B}
+html[data-theme="light"] .menupied .hbtn.act{background:#0A0A0A !important;border-color:#0A0A0A !important}
+html[data-theme="light"] .menupied .hbtn.act,html[data-theme="light"] .menupied .hbtn.act *{color:#FFFFFF !important}
+/* en haut de page, l'en-tête passe en blanc quand le menu est ouvert */
+
+html[data-theme="light"] body:has(#menupan.on) #hdr .wordmark,html[data-theme="light"] body:has(#menupan.on) #hdr .wmsvg{color:#0A0A0A !important}
+html[data-theme="light"] body:has(#menupan.on) #hdr button{color:#0A0A0A !important;border-color:rgba(0,0,0,.25) !important}
+
+/* ══ MENU EN BULLE QUI S'ALLONGE VERS LA GAUCHE (ordinateur) ══ */
+.hnav{position:relative}
+#menubtn{position:relative;z-index:3}
+.menupan.pill{position:absolute !important;top:50% !important;right:0 !important;left:auto !important;
+  transform:translateY(-50%);height:var(--mbh,44px);max-height:none !important;
+  display:flex;align-items:center;flex-wrap:nowrap;white-space:nowrap;
+  max-width:var(--mbw,110px);opacity:0;pointer-events:none;overflow:hidden;
+  padding:0 calc(var(--mbw,110px) + 6px) 0 18px;border-radius:999px !important;
+  border:1px solid rgba(255,255,255,.22) !important;background:rgba(8,12,24,.96) !important;
+  backdrop-filter:none !important;-webkit-backdrop-filter:none !important;box-shadow:none !important;
+  transition:max-width .55s cubic-bezier(.22,1,.36,1),opacity .25s ease;z-index:2}
+.menupan.pill.on{max-width:1500px;opacity:1;pointer-events:auto;border-bottom:1px solid rgba(255,255,255,.22) !important}
+.menupan.pill .inner{display:flex;flex-wrap:nowrap;align-items:center;padding:0 !important;width:auto;max-width:none;margin:0}
+.menupan.pill .inner>*{flex:0 0 auto !important}
+.menupan.pill .hbtn:not(.act){padding:8px 14px !important;border:0 !important;font-size:13px !important;color:rgba(255,255,255,.85) !important}
+.menupan.pill .menupied{display:flex;flex-direction:row !important;align-items:center;gap:14px;border:0 !important;
+  padding:0 0 0 14px !important;margin:0 !important;border-left:1px solid rgba(255,255,255,.18) !important;background:none !important}
+.menupan.pill .menupied .hbtn.act{padding:8px 16px !important;font-size:13px !important}
+html[data-theme="light"] .menupan.pill{background:#FFFFFF !important;border-color:rgba(0,0,0,.18) !important;box-shadow:0 6px 24px rgba(0,0,0,.08) !important}
+html[data-theme="light"] .menupan.pill .hbtn:not(.act){color:#1A1A1A !important}
+html[data-theme="light"] .menupan.pill .menupied{border-left-color:rgba(0,0,0,.12) !important}
+html[data-theme="light"] #hdr .menupan.pill .menupied .hbtn.act{background:#0A0A0A !important;border:1px solid #0A0A0A !important;border-radius:999px !important}
+html[data-theme="light"] #hdr .menupan.pill .menupied .hbtn.act,html[data-theme="light"] #hdr .menupan.pill .menupied .hbtn.act *{color:#FFFFFF !important}
+html[data-theme="light"] body:has(#menupan.on) #hdr .menupan.pill .menupied .hbtn.act,html[data-theme="light"] body:has(#menupan.on) #hdr .menupan.pill .menupied .hbtn.act *{color:#FFFFFF !important}
+html[data-theme="light"] body:has(#menupan.on) #hdr .hin *{color:#0A0A0A !important}
+html[data-theme="light"] body:has(#menupan.on) #hdr .hin .menupied .hbtn.act,html[data-theme="light"] body:has(#menupan.on) #hdr .hin .menupied .hbtn.act *{color:#FFFFFF !important}
+
+/* bulles des chantiers : fond blanc, pictos noirs (version blanche) */
+html[data-theme="light"] #chantiers .bring{background:#FFFFFF !important;box-shadow:0 8px 24px rgba(0,0,0,.06) !important}
+
+
+
+/* bouton jour / nuit dans le menu */
+.modebtn{appearance:none;cursor:pointer;display:inline-flex;align-items:center;gap:7px;background:none;
+  border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:6px 12px;font:inherit;font-size:12px;
+  letter-spacing:.08em;color:rgba(255,255,255,.9)}
+.modebtn svg{width:15px;height:15px}
+.modebtn .nuit{display:inline-flex;align-items:center;gap:7px}
+.modebtn .jour{display:none;align-items:center;gap:7px}
+html[data-theme="light"] .modebtn{border-color:rgba(0,0,0,.2) !important;color:#0A0A0A !important}
+html[data-theme="light"] .modebtn .nuit{display:none !important}
+html[data-theme="light"] .modebtn .jour{display:inline-flex}
+html,body,section,.card,.menupan,#hdr{transition:background-color .35s ease,color .35s ease}
+
+/* ══ FONDATEUR : le fond bascule au noir quand on y arrive ══
+   Le noir est une couche à part, fondue en haut et en bas, qui déborde
+   un peu sur les sections voisines : aucune arête nette. */
+#fondateur{position:relative;overflow:visible}
+#fondateur>.wrap{position:relative;z-index:1}
+#fondateur .fnuit{position:absolute;left:0;right:0;top:-140px;bottom:-140px;z-index:0;pointer-events:none;
+  background:#000;opacity:0;transition:opacity 1.6s cubic-bezier(.22,1,.36,1);
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 180px,#000 calc(100% - 180px),transparent 100%);
+          mask-image:linear-gradient(180deg,transparent 0,#000 180px,#000 calc(100% - 180px),transparent 100%)}
+#fondateur.nuitfond .fnuit{opacity:1}
+#fondateur *{transition:color 1.6s cubic-bezier(.22,1,.36,1),border-color 1.6s ease}
+html[data-theme="light"] #fondateur.nuitfond{--w:#FFFFFF;--g1:#F2F3F6;--g2:#C9CDD6;--g3:#8B91A2;--g4:#3A4054;--tint:255,255,255;--line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.2);color:#C9CDD6}
+html[data-theme="light"] #fondateur.nuitfond h2,html[data-theme="light"] #fondateur.nuitfond .fcite p{color:#FFFFFF !important}
+html[data-theme="light"] #fondateur.nuitfond p{color:#C9CDD6}
+html[data-theme="light"] #fondateur.nuitfond .kick{color:#8B91A2}
+#fondateur:before{transition:opacity 1.6s ease}
+#fondateur.nuitfond:before{opacity:0}
+
+/* raccourcis du menu à la même taille que « Menu » */
+.menupan.pill .hbtn:not(.act),.menupan.pill .menupied .hbtn.act,.menupan.pill .modebtn{font-size:16px !important}
+.menupan.pill .hbtn:not(.act){padding:8px 16px !important}
+
+/* bulle du menu : tout comme « MENU » (même police, taille, capitales, pas de gras) */
+.menupan.pill .hbtn,.menupan.pill .hbtn *,.menupan.pill .modebtn,.menupan.pill .modebtn *,.menupan.pill .lang .lg,.menupan.pill .lang span{
+  font-family:Outfit,Figtree,Inter,system-ui,-apple-system,sans-serif !important;font-size:16px !important;
+  font-weight:400 !important;letter-spacing:.14em !important;text-transform:uppercase !important}
+.menupan.pill .hbtn:not(.act){padding:8px 14px !important}
+
+/* sur écrans moyens, le nom s'efface le temps que la bulle est ouverte */
+@media (max-width:1600px){#hdr .wordmark{transition:opacity .35s ease}
+  body:has(.menupan.pill.on) #hdr .wordmark{opacity:0}}
+@media (min-width:1200px){#menubtn,#menubtn span{font-family:Outfit,Figtree,Inter,system-ui,-apple-system,sans-serif !important;font-size:16px !important;font-weight:400 !important;letter-spacing:.14em !important;text-transform:uppercase !important}}
+
+/* ══ ENTRÉES ANIMÉES : cases des 11 zones et tuiles métiers ══
+   Propriétés individuelles (translate/scale) pour ne pas écraser
+   le zoom au survol. L'animation se rejoue à chaque passage. */
+.anim-in{opacity:0;translate:0 46px;scale:.96;
+  transition:opacity .9s cubic-bezier(.22,1,.36,1),translate .9s cubic-bezier(.22,1,.36,1),scale .9s cubic-bezier(.22,1,.36,1);
+  transition-delay:var(--ad,0ms)}
+.anim-in.vu{opacity:1;translate:0 0;scale:1}
+#zones .card.zc{transition:opacity .9s cubic-bezier(.22,1,.36,1),translate .9s cubic-bezier(.22,1,.36,1),scale .9s cubic-bezier(.22,1,.36,1),transform .45s cubic-bezier(.22,1,.36,1),box-shadow .45s ease,border-color .45s ease}
+#zones .card.zc:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,0,0,.18) !important;border-color:rgba(232,117,42,.55) !important}
+#zones .card.zc .zbar i{transition:width 1.2s cubic-bezier(.22,1,.36,1)}
+#zones .card.zc:hover .zbar i{box-shadow:0 0 12px rgba(232,117,42,.6)}
+@media (prefers-reduced-motion:reduce){.anim-in{opacity:1;translate:none;scale:none;transition:none}}
+
+/* intro raccourcie de 0,5 s */
+.intro #t1{animation:ipasse 1.55s var(--iz) .5s forwards !important}
+.intro #t2{animation:ipasse 1.8s var(--iz) 1.75s forwards !important}
+.intro #t3{animation:ireste 1.1s var(--iz) 3.2s forwards !important}
+.intro .ibtn{animation-delay:3.85s !important}
+
+/* mode jour : pictos des cases en noir */
+html[data-theme="light"] .ph .phico,html[data-theme="light"] .ph .phico *{stroke:#0A0A0A !important;color:#0A0A0A !important}
+html[data-theme="light"] .ph .phico [fill]:not([fill="none"]){fill:#0A0A0A !important}
+html[data-theme="light"] .ph .phico{opacity:.85 !important;filter:none !important}
+
+/* la flamme du logo tourne sur elle-même, comme les pictos des bulles */
+
+
+/* flamme du logo : seul le cœur tourne, le cercle reste fixe (même image, deux masques) */
+.flamewrap>img.flimg:not(.flcoeur){-webkit-mask-image:radial-gradient(circle,transparent 0 36%,#000 38%);mask-image:radial-gradient(circle,transparent 0 36%,#000 38%)}
+.flamewrap>img.flcoeur{position:absolute !important;inset:0;width:100%;height:100%;
+  -webkit-mask-image:radial-gradient(circle,#000 0 36%,transparent 38%);mask-image:radial-gradient(circle,#000 0 36%,transparent 38%);
+  animation:flamtour 9s linear infinite !important}
+@keyframes flamtour{0%,58%{rotate:y 0deg}100%{rotate:y 360deg}}
+@media (prefers-reduced-motion:reduce){.flamewrap>img.flcoeur{animation:none !important}}
+
+/* ══ JOURNAL : cartes épurées ══ */
+.jcov{height:auto !important;padding:26px 30px 0 !important;border-bottom:0 !important;background:none !important;
+  display:flex !important;align-items:baseline !important;gap:14px}
+.jcov b{font-size:12px !important;font-weight:400 !important;letter-spacing:.2em !important;color:var(--g3) !important}
+.jcov i{position:static !important;max-width:none !important;text-align:left !important;font-size:10.5px !important;
+  font-weight:400 !important;letter-spacing:.22em !important;color:var(--g3) !important}
+.jcin{padding:18px 30px 30px !important;gap:16px !important}
+.jct{font-size:clamp(18px,1.4vw,21px) !important;font-weight:400 !important;line-height:1.4 !important;letter-spacing:-.01em !important}
+.jcx{font-size:14.5px !important;line-height:1.8 !important}
+.jcgo{padding-top:14px !important;font-size:10.5px !important;letter-spacing:.2em !important}
+.jc{background:transparent !important}
+html[data-theme="light"] .jc{background:#FFFFFF !important}
+
+/* ══ Cases : texte qui se déroule à l'arrivée ══ */
+#zones .card.zc h3,#zones .card.zc p{clip-path:inset(0 100% 0 0);transition:clip-path 1s cubic-bezier(.22,1,.36,1) .25s}
+#zones .card.zc.vu h3,#zones .card.zc.vu p{clip-path:inset(0 0 0 0)}
+#zones .card.zc.vu p{transition-delay:.45s}
+/* fondateur : paragraphes qui montent l'un après l'autre */
+#fondateur .ftexte>p,#fondateur .fcite{opacity:0;translate:0 22px;transition:opacity 1.1s ease,translate 1.1s cubic-bezier(.22,1,.36,1)}
+#fondateur.nuitfond .ftexte>p,#fondateur.nuitfond .fcite{opacity:1;translate:0 0}
+
+
+
+#fondateur.nuitfond .fcite{transition-delay:1.4s}
+@media (prefers-reduced-motion:reduce){#zones .card.zc h3,#zones .card.zc p{clip-path:none}#fondateur .ftexte>p,#fondateur .fcite{opacity:1;translate:none}}
+
+/* anneau des 13 chantiers : orange-jaune plus vif, chiffre en police des titres */
+#ringSvg path{filter:drop-shadow(0 0 6px rgba(255,170,40,.75)) saturate(1.25) !important}
+#ringSvg text{font-family:Outfit,Figtree,Inter,system-ui,sans-serif !important}
+#ringSvg text:first-of-type{font-weight:300 !important;letter-spacing:-.02em}
+@keyframes segallume{0%{opacity:1}7%{opacity:.92}15%{opacity:.82}23%{opacity:.72}31%{opacity:.64}40%,100%{opacity:.58}}
+
+/* fondateur : le texte se déroule ligne après ligne (balayage de haut en bas) */
+@property --rv{syntax:'<percentage>';inherits:false;initial-value:0%}
+#fondateur .ftexte>p,#fondateur .fcite p{--rv:0%;
+  -webkit-mask-image:linear-gradient(180deg,#000 calc(var(--rv) - 14%),transparent var(--rv));
+          mask-image:linear-gradient(180deg,#000 calc(var(--rv) - 14%),transparent var(--rv));
+  transition:--rv 2.2s cubic-bezier(.45,0,.2,1),opacity 1s ease,translate 1.2s cubic-bezier(.22,1,.36,1) !important}
+#fondateur.nuitfond .ftexte>p,#fondateur.nuitfond .fcite p{--rv:115%}
+#fondateur .ftexte>p.kick{-webkit-mask-image:none !important;mask-image:none !important}
+#fondateur.nuitfond .ftexte>p.fintro{transition-delay:.4s !important}
+#fondateur.nuitfond .ftexte>p.fintro+p{transition-delay:1.1s !important}
+#fondateur.nuitfond .ftexte>p.fintro+p+p{transition-delay:1.8s !important}
+#fondateur.nuitfond .fcite p{transition-delay:2.8s !important}
+/* la citation : son filet se trace, puis le texte */
+#fondateur .fcite{position:relative;border-left-color:transparent !important}
+#fondateur .fcite:before{content:"";position:absolute;left:0;top:0;bottom:0;width:1px;background:currentColor;opacity:.35;
+  transform:scaleY(0);transform-origin:top;transition:transform 1.4s cubic-bezier(.22,1,.36,1) 2.5s}
+#fondateur.nuitfond .fcite:before{transform:scaleY(1)}
+#fondateur.nuitfond .fcite{transition-delay:2.4s !important}
+/* la phrase soulignée : le trait se dessine */
+#fondateur .souligne{background-image:linear-gradient(currentColor,currentColor);background-repeat:no-repeat;
+  background-position:0 100%;background-size:0% 1px;text-decoration:none !important;transition:background-size 1.6s cubic-bezier(.22,1,.36,1) 2.6s}
+#fondateur.nuitfond .souligne{background-size:100% 1px}
+@media (prefers-reduced-motion:reduce){#fondateur .ftexte>p,#fondateur .fcite p{-webkit-mask-image:none;mask-image:none}#fondateur .fcite:before{transform:none}#fondateur .souligne{background-size:100% 1px}}
+
+/* tuiles métiers : voile plus sombre et dégradé qui monte plus haut (masque aussi les photos moins nettes) */
+.mtuile:after{background:linear-gradient(180deg,rgba(0,0,0,.30) 0%,rgba(0,0,0,.22) 30%,rgba(0,0,0,.55) 62%,rgba(0,0,0,.90) 100%) !important}
+.mtuile .dia .im.di{filter:brightness(.88) contrast(1.05) saturate(.95)}
+.mtuile:hover:after{background:linear-gradient(180deg,rgba(0,0,0,.18) 0%,rgba(0,0,0,.12) 30%,rgba(0,0,0,.45) 62%,rgba(0,0,0,.85) 100%) !important}
+
+/* fondateur : déroulés croisés (millefeuille) */
+#fondateur .ftexte>p.fintro,#fondateur .ftexte>p.fintro+p+p{
+  -webkit-mask-image:linear-gradient(90deg,#000 calc(var(--rv) - 14%),transparent var(--rv)) !important;
+          mask-image:linear-gradient(90deg,#000 calc(var(--rv) - 14%),transparent var(--rv)) !important;translate:-28px 0}
+#fondateur .ftexte>p.fintro+p{
+  -webkit-mask-image:linear-gradient(270deg,#000 calc(var(--rv) - 14%),transparent var(--rv)) !important;
+          mask-image:linear-gradient(270deg,#000 calc(var(--rv) - 14%),transparent var(--rv)) !important;translate:28px 0}
+#fondateur .fcite p{
+  -webkit-mask-image:linear-gradient(0deg,#000 calc(var(--rv) - 14%),transparent var(--rv)) !important;
+          mask-image:linear-gradient(0deg,#000 calc(var(--rv) - 14%),transparent var(--rv)) !important}
+#fondateur .fcite{translate:0 40px}
+#fondateur.nuitfond .ftexte>p.fintro,#fondateur.nuitfond .ftexte>p.fintro+p,#fondateur.nuitfond .ftexte>p.fintro+p+p,#fondateur.nuitfond .fcite{translate:0 0}
+#fondateur .ftexte>p,#fondateur .fcite p{transition:--rv 1.9s cubic-bezier(.45,0,.2,1),opacity 1s ease,translate 1.9s cubic-bezier(.22,1,.36,1) !important}
+#fondateur .fcite{transition:opacity 1.2s ease,translate 1.6s cubic-bezier(.22,1,.36,1) !important}
+#fondateur.nuitfond .fcite{transition-delay:2.6s !important}
+#fondateur .fcite:before{transform-origin:bottom !important}
+
+/* fondu du fondateur : long, en courbe douce, avec grain très fin (pas de paliers visibles) */
+#fondateur .fnuit{top:-380px !important;bottom:-380px !important;
+  -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,0.000) 0px,rgba(0,0,0,0.002) 26px,rgba(0,0,0,0.016) 52px,rgba(0,0,0,0.049) 79px,rgba(0,0,0,0.104) 105px,rgba(0,0,0,0.180) 131px,rgba(0,0,0,0.275) 158px,rgba(0,0,0,0.384) 184px,rgba(0,0,0,0.500) 210px,rgba(0,0,0,0.616) 236px,rgba(0,0,0,0.725) 262px,rgba(0,0,0,0.820) 289px,rgba(0,0,0,0.896) 315px,rgba(0,0,0,0.951) 341px,rgba(0,0,0,0.984) 368px,rgba(0,0,0,0.998) 394px,rgba(0,0,0,1.000) 420px,rgba(0,0,0,1.000) calc(100% - 420px),rgba(0,0,0,0.998) calc(100% - 394px),rgba(0,0,0,0.984) calc(100% - 368px),rgba(0,0,0,0.951) calc(100% - 341px),rgba(0,0,0,0.896) calc(100% - 315px),rgba(0,0,0,0.820) calc(100% - 289px),rgba(0,0,0,0.725) calc(100% - 262px),rgba(0,0,0,0.616) calc(100% - 236px),rgba(0,0,0,0.500) calc(100% - 210px),rgba(0,0,0,0.384) calc(100% - 184px),rgba(0,0,0,0.275) calc(100% - 158px),rgba(0,0,0,0.180) calc(100% - 131px),rgba(0,0,0,0.104) calc(100% - 105px),rgba(0,0,0,0.049) calc(100% - 79px),rgba(0,0,0,0.016) calc(100% - 52px),rgba(0,0,0,0.002) calc(100% - 26px),rgba(0,0,0,0.000) calc(100% - 0px)) !important;mask-image:linear-gradient(180deg,rgba(0,0,0,0.000) 0px,rgba(0,0,0,0.002) 26px,rgba(0,0,0,0.016) 52px,rgba(0,0,0,0.049) 79px,rgba(0,0,0,0.104) 105px,rgba(0,0,0,0.180) 131px,rgba(0,0,0,0.275) 158px,rgba(0,0,0,0.384) 184px,rgba(0,0,0,0.500) 210px,rgba(0,0,0,0.616) 236px,rgba(0,0,0,0.725) 262px,rgba(0,0,0,0.820) 289px,rgba(0,0,0,0.896) 315px,rgba(0,0,0,0.951) 341px,rgba(0,0,0,0.984) 368px,rgba(0,0,0,0.998) 394px,rgba(0,0,0,1.000) 420px,rgba(0,0,0,1.000) calc(100% - 420px),rgba(0,0,0,0.998) calc(100% - 394px),rgba(0,0,0,0.984) calc(100% - 368px),rgba(0,0,0,0.951) calc(100% - 341px),rgba(0,0,0,0.896) calc(100% - 315px),rgba(0,0,0,0.820) calc(100% - 289px),rgba(0,0,0,0.725) calc(100% - 262px),rgba(0,0,0,0.616) calc(100% - 236px),rgba(0,0,0,0.500) calc(100% - 210px),rgba(0,0,0,0.384) calc(100% - 184px),rgba(0,0,0,0.275) calc(100% - 158px),rgba(0,0,0,0.180) calc(100% - 131px),rgba(0,0,0,0.104) calc(100% - 105px),rgba(0,0,0,0.049) calc(100% - 79px),rgba(0,0,0,0.016) calc(100% - 52px),rgba(0,0,0,0.002) calc(100% - 26px),rgba(0,0,0,0.000) calc(100% - 0px)) !important}
+#fondateur .fnuit:after{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");background-size:220px 220px;opacity:.035;mix-blend-mode:screen;pointer-events:none}
+
+
+/* pictos des 4 cases : ils tournent sur eux-mêmes, taille inchangée */
+.pimg{perspective:500px}
+.pimg>img{animation:emtour 9s linear infinite;backface-visibility:visible}
+.pimg:nth-of-type(1)>img{animation-delay:0s}
+@keyframes emtour{0%,58%{rotate:y 0deg}100%{rotate:y 360deg}}
+@media (prefers-reduced-motion:reduce){.pimg>img{animation:none}}
+
+/* fondateur : bords nets (plus de fondu), bascule plus lente */
+#fondateur .fnuit{top:0 !important;bottom:0 !important;-webkit-mask-image:none !important;mask-image:none !important;
+  transition:opacity 2.1s cubic-bezier(.22,1,.36,1) !important}
+#fondateur .fnuit:after{display:none !important}
+#fondateur h2,#fondateur p,#fondateur .kick,#fondateur .fcite{transition:color 2.1s cubic-bezier(.22,1,.36,1),border-color 2.1s ease}
+#fondateur .tw .ch{transition:opacity .25s ease,color 2.1s ease}
+
+/* ══ FLUIDITÉ ══ */
+/* 1. filtres coûteux retirés des éléments animés */
+#ringSvg path{filter:none !important}
+.mtuile .dia .im.di{filter:none !important}
+.mtuile:after{background:linear-gradient(180deg,rgba(0,0,0,.36) 0%,rgba(0,0,0,.28) 30%,rgba(0,0,0,.6) 62%,rgba(0,0,0,.92) 100%) !important}
+.aura{animation:none !important;filter:none !important}
+.grain{will-change:transform;transform:translateZ(0);contain:strict}
+/* 2. les animations en boucle s'arrêtent hors écran */
+.horsvue *,.horsvue *:before,.horsvue *:after{animation-play-state:paused !important}
+/* 3. calques GPU pour ce qui bouge en continu */
+.drow,#marq .row{will-change:transform}
+/* 4. sections hors écran non calculées tant qu'on n'y arrive pas */
+
+
+/* petits textes remontés de 2 px (VSL, FAQ, journal, légendes) */
+#preuve .vslside,#preuve .vslside *,#preuve li{font-size:max(1em,14px)}
+.jcx{font-size:16px !important}.jct{font-size:clamp(19px,1.5vw,22px) !important}.jcgo,.jcov b,.jcov i{font-size:12px !important}
+#faq summary,#faq .q,#faq details>*{font-size:max(1em,16px)}
+.lead,.sub{font-size:max(1em,16.5px)}
+
+/* le contenu garde toute la largeur de l'écran malgré la réduction : conteneurs élargis en proportion */
+@media (min-width:1200px){.wrap{max-width:calc(1440px / var(--z,1)) !important}}
+
+/* lueur de l'anneau, optimisée : un calque flou fixe derrière, calculé une seule fois */
+#vizRing{position:relative}
+#ringGlow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;
+  filter:blur(7px) saturate(1.3);opacity:.85;will-change:transform;transform:translateZ(0)}
+#ringGlow path,#ringGlow circle,#ringGlow line{animation:none !important;opacity:1 !important;stroke-width:6 !important}
+#ringGlow text{display:none}
+#ringSvg{position:relative;z-index:1}
+
+/* galerie métiers : aérée, façon galerie d'art */
+@media (min-width:901px){
+  #mgrid.mgrid{row-gap:clamp(70px,7vw,120px) !important;column-gap:clamp(28px,2.6vw,44px) !important}
+  #metiers .mtitre{margin-bottom:clamp(40px,4vw,72px)}
+  #metiers{padding-bottom:clamp(90px,9vw,160px)}
+}
+@media (max-width:900px){#mgrid.mgrid{row-gap:44px !important;column-gap:14px !important}}
+
+/* 13 bulles sur une seule ligne (ordinateur) : elles se partagent la largeur, quelle que soit l'échelle */
+@media (min-width:1000px){
+  #chantiers .bulles{display:grid !important;grid-template-columns:repeat(13,minmax(0,1fr)) !important;gap:clamp(8px,1vw,18px) !important;
+    width:100%;max-width:none !important;justify-content:stretch}
+  #chantiers .bulles>*{width:auto !important;min-width:0;margin:0 !important}
+  #chantiers .bul .bring{width:100% !important;max-width:96px;height:auto !important;aspect-ratio:1;margin-inline:auto}
+  #chantiers .bul span:last-child{font-size:clamp(8.5px,.62vw,10.5px) !important;letter-spacing:.1em !important}
+}
+
+/* VARIANTE : bulles à gauche, titre et texte à droite */
+@media (min-width:1000px){
+  #chantiers>.wrap{display:grid !important;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);column-gap:clamp(40px,5vw,100px);
+    grid-template-areas:"bul kick" "bul titre" "bul ring" "bul lead";align-items:start}
+  #chantiers>.wrap>.kick{grid-area:kick}
+  #chantiers>.wrap>h2{grid-area:titre;max-width:none}
+  #chantiers>.wrap>#vizRing{grid-area:ring;margin:26px 0 0 !important;max-width:220px !important}
+  #chantiers>.wrap>.lead{grid-area:lead}
+  #chantiers>.wrap>#bulles{grid-area:bul;align-self:center;margin:0 !important;
+    display:flex !important;flex-wrap:wrap;justify-content:center;row-gap:clamp(22px,2.4vw,40px) !important;column-gap:clamp(14px,1.6vw,28px) !important}
+  #chantiers>.wrap>#bulles>*{flex:0 0 17% !important;width:17% !important;max-width:17% !important}
+  #chantiers>.wrap>#bulles{column-gap:3.5% !important}
+  #chantiers>.wrap>.kick,#chantiers>.wrap>h2,#chantiers>.wrap>.lead{text-align:left !important;margin-left:0 !important;margin-right:0 !important;justify-content:flex-start}
+  #chantiers>.wrap>.lead{max-width:46ch}
+  #chantiers .bul span:last-child{font-size:clamp(9px,.7vw,11px) !important}
+}
+
+/* ══ RESPIRATION GÉNÉRALE : façon galerie d'art ══ */
+:root{--pad:clamp(150px,20vw,340px) !important;--gap:clamp(80px,10vw,160px) !important}
+@media (max-width:760px){:root{--pad:120px !important;--gap:64px !important}}
+/* titres : de l'air au-dessus et en dessous */
+section h2{margin-top:clamp(18px,2vw,32px)}
+section h2+*{margin-top:clamp(40px,4.5vw,80px) !important}
+section .kick+h2{margin-top:clamp(16px,1.6vw,26px)}
+/* blocs successifs dans une section */
+section .wrap>*+*{margin-top:max(var(--mt,0px),clamp(56px,6vw,110px))}
+section .wrap>.kick+*{margin-top:clamp(16px,1.6vw,26px)}
+section .wrap>h2+.lead,section .wrap>h2+p{margin-top:clamp(28px,3vw,52px) !important}
+/* grilles de cases : plus d'air autour et entre */
+#zones{margin-top:clamp(70px,7vw,130px) !important;margin-bottom:clamp(70px,7vw,130px) !important;gap:clamp(18px,1.6vw,28px) !important}
+.card,.jc,.pslide{line-height:1.7}
+.grid,.g2,.g3,.g4,.trio,.cards{gap:clamp(22px,2.2vw,40px)}
+
+section h2:not(:first-child):not(.kick+h2){margin-top:clamp(100px,10vw,180px) !important}
+section .kick:not(:first-child){margin-top:clamp(100px,10vw,180px) !important}
+
+/* rangées équilibrées : 10 leviers en 5 + 5, 11 zones en 6 + 5 */
+@media (min-width:1000px){
+  #canaux.canaux{grid-template-columns:repeat(5,minmax(0,1fr)) !important}
+  #zones{grid-template-columns:repeat(6,minmax(0,1fr)) !important}
+}
+
+/* ══ AÉRATION GLOBALE — passe 2 ══ */
+/* galerie métiers : encore plus d'air */
+@media (min-width:901px){#mgrid.mgrid{row-gap:clamp(100px,9.5vw,170px) !important;column-gap:clamp(36px,3.2vw,56px) !important}}
+@media (max-width:900px){#mgrid.mgrid{row-gap:60px !important;column-gap:16px !important}}
+/* toutes les grilles de cartes */
+.canaux,#zones,.probs,.grid,.g2,.g3,.g4,.offres,.plans,.cas,.cases,.trio,.trip{column-gap:clamp(24px,2.4vw,44px) !important;row-gap:clamp(28px,3vw,56px) !important}
+/* intérieur des cartes : plus de marge */
+.card,.canal,.prob,.casec,.plan,.offre .card{padding:clamp(30px,2.8vw,52px) !important}
+.card>*+*,.canal>*+*,.prob>*+*{margin-top:clamp(12px,1.1vw,20px)}
+/* texte courant : lignes plus longues à respirer, colonnes moins larges */
+section p{line-height:1.85}
+section .lead,section .sub,section .mlead{line-height:1.9;max-width:58ch}
+/* titres : plus de place */
+h2{line-height:1.22 !important}
+/* pages métiers (panneaux) */
+.msec{padding:clamp(110px,11vw,200px) 0 !important}
+.mlev{row-gap:clamp(18px,2vw,34px) !important}
+.mlev>div{padding-top:clamp(40px,3.6vw,60px) !important;padding-bottom:clamp(44px,4vw,66px) !important}
+.mgam{gap:clamp(24px,2.6vw,44px) !important;margin-top:clamp(50px,5vw,90px) !important}
+.mgam .gcol{padding:clamp(34px,3.2vw,56px) !important}
+/* FAQ et journal */
+#faq details{padding-block:clamp(18px,1.8vw,30px)}
+.jcin{padding:22px 34px 36px !important}.jcov{padding:32px 34px 0 !important}
+/* bandeau de preuves et carrousels : plus d'espace entre éléments */
+.ph{margin-inline:clamp(8px,.8vw,14px)}
+.csl{padding-inline:clamp(8px,.9vw,16px)}
+/* bas de sections : jamais collé à la suivante */
+section .wrap>*:last-child{margin-bottom:0}
+
+/* bug corrigé : page métier illisible en mode Jour (texte sombre sur fond noir) → le panneau garde sa palette nuit */
+html[data-theme="light"] #mpan{--w:#FFFFFF;--g1:#F2F3F6;--g2:#C9CDD6;--g3:#8B91A2;--g4:#3A4054;--tint:255,255,255;--tintbg:6,11,24;--tintbg2:17,26,49;
+  --line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.2);--line3:rgba(255,255,255,.34);--onw:#050A18;color:#C9CDD6}
+html[data-theme="light"] #mpan h2,html[data-theme="light"] #mpan h3,html[data-theme="light"] #mpan h4{color:#FFFFFF}
+
+/* bulles des chantiers un peu plus grandes */
+@media (min-width:1000px){
+  #chantiers .bulles{gap:clamp(6px,.7vw,14px) !important}
+  #chantiers .bul .bring{max-width:150px !important}
+  #chantiers .bul span:last-child{font-size:clamp(11px,.85vw,14px) !important}
+}
+
+/* intro : 1 s plus courte, logo PYROS qui apparaît en douceur en grossissant */
+.intro .imark{animation:logoin 1.3s cubic-bezier(.22,1,.36,1) .05s both !important}
+@keyframes logoin{from{opacity:0;transform:scale(.82);filter:blur(6px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
+.intro #t1{animation:ipasse 1.3s var(--iz) .35s forwards !important}
+.intro #t2{animation:ipasse 1.5s var(--iz) 1.35s forwards !important}
+.intro #t3{animation:ireste 1s var(--iz) 2.45s forwards !important}
+.intro .ibtn{animation-delay:2.95s !important}
+
+/* logo PYROS façon générique de studio : arrive de loin, flou, se pose, puis un reflet le traverse */
+.intro .imark{position:relative;animation:logociné 2.4s cubic-bezier(.16,1,.3,1) .05s both !important}
+@keyframes logociné{
+  0%{opacity:0;transform:scale(1.35);filter:blur(16px);letter-spacing:.2em}
+  35%{opacity:1}
+  100%{opacity:1;transform:scale(1);filter:blur(0)}}
+.intro .imark .wmsvg{animation:none !important;filter:none !important}
+@keyframes logolueur{0%{filter:drop-shadow(0 0 0 rgba(255,164,27,0))}45%{filter:drop-shadow(0 0 14px rgba(255,164,27,.75))}100%{filter:drop-shadow(0 0 0 rgba(255,164,27,0))}}
+@media (prefers-reduced-motion:reduce){.intro .imark,.intro .imark .wmsvg{animation:none !important;opacity:1}}
+
+
+@media (min-width:1000px){#probs.probs{column-gap:clamp(40px,4vw,72px) !important}}
+
+/* ══ FLUIDITÉ — passe 2 (aucun changement visible) ══ */
+/* diapos des tuiles : seules l'image affichée et la suivante sont peintes */
+.mtuile .dia .im.di:not(.on){transform:none !important}
+.mtuile .dia .im.di:not(.on):not([data-ok]){display:none}
+/* isolation des blocs : un changement dans une case ne recalcule pas toute la page */
+.mtuile,.card,.prob,.canal,.jc,.csl,.bul,.ph,.pslide{contain:layout style}
+#mgrid,#probs,#canaux,#zones,#bulles,#marq,.drow{contain:layout style}
+/* le décor fixe sur son propre calque, une fois pour toutes */
+.bgfx,.grain{transform:translateZ(0);backface-visibility:hidden}
+/* la lueur de l'anneau : calque figé */
+#ringGlow{contain:strict}
 </style>
 <script>
 /* ─── Le menu se replie, la langue se choisit ────────────────────
@@ -5709,7 +6127,7 @@ function titresAnimes(){
       var wd = document.createElement('span'); wd.className = 'wd';
       Array.prototype.forEach.call(mot, function(c){
         var sp = document.createElement('span');
-        sp.className = 'ch'; sp.style.opacity = 1; sp.textContent = c;
+        sp.className = 'ch'; if(el.dataset.done) sp.style.opacity = 1; sp.textContent = c;
         wd.appendChild(sp);
       });
       el.appendChild(wd);
@@ -6087,6 +6505,105 @@ window.majMeta = function(l){
     io.observe(d.closest('.mtuile'));
   });
 })();
+</script>
+<script>
+/* Menu en bulle : sur ordinateur, le panneau entre dans l'en-tete et s'allonge vers la gauche depuis « Menu ». */
+(function(){
+  var pan=document.getElementById('menupan'), tog=document.getElementById('menubtn');
+  if(!pan||!tog) return;
+  var nav=tog.parentNode, home=pan.parentNode, mq=window.matchMedia('(min-width:1200px)');
+  function place(){
+    if(mq.matches){
+      if(pan.parentNode!==nav) nav.insertBefore(pan,tog);
+      pan.classList.add('pill');
+      pan.style.setProperty('--mbh',tog.offsetHeight+'px');
+      pan.style.setProperty('--mbw',tog.offsetWidth+'px');
+    }else{
+      pan.classList.remove('pill');
+      if(pan.parentNode!==home) home.appendChild(pan);
+    }
+  }
+  place(); window.addEventListener('resize',place);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(place);
+})();
+</script>
+<script>
+/* Bouton jour / nuit : ajouté dans le menu, le choix est mémorisé */
+(function(){
+  var pied=document.querySelector('.menupied'); if(!pied) return;
+  var b=document.createElement('button'); b.type='button'; b.className='modebtn'; b.id='modeBtn';
+  b.setAttribute('aria-label','Mode jour ou nuit');
+  b.innerHTML='<span class="nuit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.3 4.3l1.6 1.6M18.1 18.1l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.3 19.7l1.6-1.6M18.1 5.9l1.6-1.6"/></svg>Jour</span>'
+              +'<span class="jour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Nuit</span>';
+  pied.insertBefore(b,pied.firstChild);
+  b.addEventListener('click',function(e){
+    e.stopPropagation();
+    var m=document.documentElement.getAttribute('data-theme')==='light'?'dark':'light';
+    try{localStorage.setItem('pyros-theme',m);}catch(err){}
+    if(window.PYROS_THEME&&PYROS_THEME.paint) PYROS_THEME.paint(m);
+  });
+})();
+</script>
+<script>
+/* Fondateur : changement d'univers au défilement */
+(function(){
+  var f=document.getElementById('fondateur'); if(!f||!('IntersectionObserver' in window)) return;
+  var n=document.createElement('div'); n.className='fnuit'; n.setAttribute('aria-hidden','true'); f.insertBefore(n,f.firstChild);
+  new IntersectionObserver(function(es){es.forEach(function(e){
+    f.classList.toggle('nuitfond', e.isIntersecting);
+  });},{rootMargin:'-40% 0px -40% 0px',threshold:0}).observe(f);
+})();
+</script>
+<script>
+/* Entrées en cascade des cases (zones) et des tuiles métiers */
+(function(){
+  if(!('IntersectionObserver' in window)) return;
+  function arme(sel,pas){
+    var els=[].slice.call(document.querySelectorAll(sel));
+    els.forEach(function(el,k){el.classList.add('anim-in');el.style.setProperty('--ad',(k%8)*pas+'ms');});
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){
+      if(e.isIntersecting) e.target.classList.add('vu');
+      else if(e.boundingClientRect.top>0) e.target.classList.remove('vu');
+    });},{threshold:.12});
+    els.forEach(function(el){io.observe(el);});
+  }
+  function go(){ arme('#zones .card.zc',70); arme('#mgrid .mtuile',90); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go); else setTimeout(go,0);
+})();
+</script>
+<script>
+/* la flamme tourne dans son cercle : copie de l'image, masquée au centre */
+(function(){document.querySelectorAll('.flamewrap>img.flimg').forEach(function(im){
+  var c=im.cloneNode(true); c.classList.add('flcoeur'); c.alt=''; c.setAttribute('aria-hidden','true'); im.parentNode.appendChild(c);
+});})();
+</script>
+<script>
+(function(){document.querySelectorAll('#problemes .pimg>img').forEach(function(im,k){im.style.animationDelay=(-k*1.3)+'s';});})();
+</script>
+<script>
+/* pause des animations en boucle quand la section n'est pas à l'écran */
+(function(){ if(!('IntersectionObserver' in window)) return;
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){e.target.classList.toggle('horsvue',!e.isIntersecting);});},{rootMargin:'200px 0px'});
+  document.querySelectorAll('section').forEach(function(s){io.observe(s);});
+})();
+</script>
+<script>
+/* copie floue et immobile de l'anneau, posée derrière : la lueur sans recalcul à chaque image */
+(function(){
+  function fait(){
+    var r=document.getElementById('ringSvg'); if(!r||!r.querySelector('path')||document.getElementById('ringGlow')) return false;
+    var g=r.cloneNode(true); g.id='ringGlow'; g.setAttribute('aria-hidden','true'); g.removeAttribute('role');
+    r.parentNode.insertBefore(g,r); return true;
+  }
+  if(!fait()){ var n=0,t=setInterval(function(){ if(fait()||++n>40) clearInterval(t); },250); }
+})();
+</script>
+<script>
+/* machine à écrire : une fois le titre écrit, on retire les transitions des lettres (des centaines d'éléments de moins à surveiller) */
+(function(){ setInterval(function(){ document.querySelectorAll('h2.tw[data-done]:not(.fini)').forEach(function(h){
+  if(!h.classList.contains('typing')){ h.classList.add('fini'); h.querySelectorAll('.ch').forEach(function(c){c.style.transition='none';}); } }); },1500); })();
+/* images : décodage hors du fil principal */
+document.querySelectorAll('img').forEach(function(i){ i.decoding='async'; });
 </script>
 </body>
 </html>
